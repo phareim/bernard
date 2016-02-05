@@ -115,8 +115,6 @@ module.exports = function (robot) {
 
     // hubot civ add [player list]
     robot.respond(/civ add (.*)/i, function (res) {
-        res.reply('skal forsøke å legge til ' + res.match[1]);
-        res.reply('players: ' + players);
         
         var playersString = res.match[1];
         
