@@ -116,15 +116,15 @@ module.exports = function (robot) {
     // hubot civ add [player list]
     robot.respond(/civ add (.*)/i, function (res) {
         
-        var playersString = res.match[1];
+        var newPlayers = res.match[1].split(" ");
         
-        try {
-            players[playersString] = players[playersString] || {
-                done: false
-            };
-        } catch (err) {
-            res.reply('Auda: ' + err);
-        }
+        newPlayers.forEach(function(entry){
+            try {
+                players[entry] = players[entry] || { done: false };
+            } catch (err) {
+                res.reply('Auda: ' + err);
+            }
+        });
 
         res.reply('Ok, da har vi følgende spillere: ' + listify(playerList()));
     });
