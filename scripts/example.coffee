@@ -11,7 +11,7 @@
 module.exports = (robot) ->
 
   # robot.hear /badger/i, (res) ->
-  #   res.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
+  #  res.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
   #
   # robot.respond /open the (.*) doors/i, (res) ->
   #   doorType = res.match[1]
@@ -26,7 +26,7 @@ module.exports = (robot) ->
   # lulz = ['lol', 'rofl', 'lmao']
   #
   # robot.respond /lulz/i, (res) ->
-  #   res.send res.random lulz
+  #  res.send res.random lulz
   #
   # robot.topic (res) ->
   #   res.send "#{res.message.text}? That's a Paddlin'"
