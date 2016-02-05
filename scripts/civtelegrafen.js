@@ -129,6 +129,7 @@ module.exports = function (robot) {
                 };
             }
         } catch (err) {
+            res.reply('Auda: ' + err);
             _didIteratorError = true;
             _iteratorError = err;
         } finally {
