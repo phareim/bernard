@@ -12,7 +12,7 @@
 //   hubot status - Hubot will tell you the turn status
 //   hubot [spiller] er ute - Tell hubot a player has left/lost the game
 //   hubot jeg er ute - Tell hubot you have left/lost the game
-//   hubot civ add [player list] - Add a space separated list of usernames as players
+//   hubot civ add [player] - Add a player
 //   hubot civ clear - Reset hubot's memory for Civilization
 
 module.exports = function (robot) {
@@ -119,32 +119,13 @@ module.exports = function (robot) {
         res.reply('players: ' + players);
         
         var playersString = res.match[1];
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
+        
         try {
-            for (var _iterator = playersString.trim().split(' ')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                var player = _step.value;
-
-                players[player] = players[player] || {
-                    done: false
-                };
-            }
+            players[playersString] = players[playersString] || {
+                done: false
+            };
         } catch (err) {
             res.reply('Auda: ' + err);
-            _didIteratorError = true;
-            _iteratorError = err;
-        } finally {
-            try {
-                if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
-                }
-            } finally {
-                if (_didIteratorError) {
-                    throw _iteratorError;
-                }
-            }
         }
 
         res.reply('Ok, da har vi følgende spillere: ' + listify(playerList()));
