@@ -46,6 +46,12 @@ module.exports = function (robot) {
         return name;
     };
 
+    robot.respond(/(.*)testtest/i, function (res) {
+        console.log('\n\ntest test test\n\n');
+        res.send('Hmmmm...');
+        robot.send('#test', 'testings');
+    });
+
     // hubot [spiller] er ferdig
     robot.respond(/(.*)ferdig/i, function (res) {
         var player = undefined;
@@ -90,7 +96,7 @@ module.exports = function (robot) {
     });
 
     // hubot status
-    robot.respond(/status/i, function (res) {
+/*    robot.respond(/status/i, function (res) {
         if (playerList().length == 0) return res.send('Jeg mangler spillere. Legg til noen, da vel.');
 
         var remaining = playersRemaining().length;
@@ -99,7 +105,7 @@ module.exports = function (robot) {
         res.send(playerList().length + ' spillere kjemper om verdensherredømme.');
         res.send('Vi venter på ' + remaining + ' ' + unit + ' denne turen.');
         res.send('Disse er ikke ferdig: ' + listify(playersRemaining()));
-    });
+    });*/
 
     // hubot [spiller] er ute
     robot.respond(/(.*) er ute/i, function (res) {
