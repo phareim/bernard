@@ -128,7 +128,7 @@ module.exports = function (robot) {
         	res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og jeg tror (?) det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
         }
         else {
-        	res.send(':earth_americas: Puhh, ferdig.');
+        	res.send(':earth_americas: Puhh, ferdig..');
         }
 	});
 
