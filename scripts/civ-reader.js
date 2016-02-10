@@ -113,8 +113,13 @@ function checkLine(line) {
 tail.on('line', function(line) {  
 	 checkLine(line); 
 });
-
+var test = 1;
 module.exports = function (robot) {
+	setInterval(function() { 
+		console.log("setTimeout: It's been five seconds!"); 
+		robot.messageRoom('#civtest', 'det har gått noen timer. best å sjekke hvor mange som har gjort turen sin.');
+		test = test + 1;
+	}, 86400000);
 	robot.respond(/civ init/i, function (res) {
 		res.send(':earth_africa: Ok, dette kan ta litt tid.');
 		
@@ -143,22 +148,28 @@ module.exports = function (robot) {
         	res.send(':question: Jeg har dessverre ikke oversikt over hvilken runde vi er på.');
         var ferdig = '';
         var uferdig = '';
-
+        var count = 0;
         for (var i = players.length - 1; i >= 0; i--) {
-        	if (players[i].done)
-        		ferdig = ferdig + '@' + players[i].slack+ ', ';
+        	if (players[i].done){
+        		count++;
+        		ferdig = ferdig + '@' + players[i].slack+', ';
+        	}
         	else
-        		uferdig = uferdig + '@' + players[i].slack+ ', ';
+        		uferdig = uferdig + '@' + players[i].slack+', ';
         };
-        if(ferdig.length > 0){
-        	ferdig = ferdig.substring(0, ferdig.length - 2);
-        	res.send(':checkered_flag: Spillere som er ferdig med turen sin: '+ferdig + '.');
         
-        }
+    	if(count === 0)
+    		res.send(':white_flag: ingen spillere er ferdig med turen sin.');
+    	else if(count === 1)
+    		res.send(':checkered_flag: én spiller er ferdig med turen sin.');
+    	else
+    		res.send(':checkered_flag: '+ count +' spillere er ferdig med turen sin.');
+        
         if(uferdig.length > 0){
 			uferdig = uferdig.substring(0, uferdig.length - 2);
 	        res.send(':watch: Vi venter på: '+uferdig + '.');
 		}
+
 
     });
 
@@ -172,6 +183,21 @@ module.exports = function (robot) {
    			 print = print + ':small_blue_diamond: ' + entry +'\n';
 		});
     	res.send(print);
+    });
+
+    robot.respond(/civ test/i, function (res) {
+    	console.log('test 1');
+    	robot.messageRoom('#testtest', 'Arrr... here I am, infederls...');
+    	console.log('test 2');
+
+    });
+
+    robot.respond(/civ timer (\d+$)/i, function (res) {
+    	var timerIgjen = res.match[1];
+    	var timerSidenStart = 48 - timerIgjen;
+    	var nyttStartpunkt = new Date(new Date().getTime() - (timerSidenStart * 60 * 60 * 1000));
+    	runde_startet = nyttStartpunkt;
+    	eventLogg.push('Start-tidspunkt satt manuelt. Det er ca. ' + timerIgjen +' timer igjen til runden er ferdig.');
     });
 }
 
