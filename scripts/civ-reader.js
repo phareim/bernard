@@ -1,14 +1,17 @@
 'use strict';
 
+var logFile   = process.env.CIV5_LOG;
+
 var Tail = require('file-tail');
-var tail = Tail.startTailing('c:/tmp/live.log');
+var tail = Tail.startTailing(logFile);
 var split = require('split');
 var fs = require('fs');
 
 var runde = 0;
-var runde_startet;
+var runde_startet = false;
 var siste = 'TEST';
 
+var eventLogg = [];
 
 var players = [
 	{
@@ -55,13 +58,16 @@ var players = [
 	}	
 ];
 function checkLine(line) {
+	var nuh = new Date();
+	var nuh = nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() + ': ';
 	if(line.indexOf('DBG: Game Turn') > -1){
-		console.log('Ny tur!');
 		runde = line.split(' ').pop();
 		runde_startet = new Date();
 		for (var i = players.length - 1; i >= 0; i--) {
 			players[i].done = false;
 		}
+		eventLogg.push( nuh + 'Runde '+ runde +' er startet!' );
+		console.log(eventLogg[eventLogg.length-1]);
 	}
 	else if (line.indexOf(':NetTurnComplete : Turn Complete') > -1){
 		// [449145.161] Net RECV (5) :NetTurnComplete : Turn Complete, 5, 6/9
@@ -69,12 +75,27 @@ function checkLine(line) {
 		arr.pop();
 		var spiller = arr.pop();
 		spiller = spiller.substring(0, spiller.length - 1);
-		siste = spiller + ' har avsluttet turen sin.';
+		
         for (var i = players.length - 1; i >= 0; i--) {
         	if (players[i].player == spiller) {
         		players[i].done = true;
+        		eventLogg.push( nuh + players[i].slack  +' har avsluttet turen sin.');
         	}
 		}		
+		console.log(eventLogg[eventLogg.length-1]);
+	}
+	else if (line.indexOf(':NetPlayerReady') > -1) {
+		
+		// [574290.318] Net RECV (1) :NetPlayerReady(Player=3, count=2 / 2)
+		var str = line.split('Player=').pop();
+		str = str.substring(0, str.indexOf(","));
+		for (var i = players.length - 1; i >= 0; i--) {
+        	if (players[i].player == str) {
+        		eventLogg.push(nuh + players[i].slack +' logget på.');
+        		players[i].done = false;
+        	}
+		}
+		console.log(eventLogg[eventLogg.length-1]);
 	}
 }
 
@@ -83,25 +104,30 @@ tail.on('line', function(line) {
 });
 
 module.exports = function (robot) {
-	robot.respond(/civ initialize/i, function (res) {
+	robot.respond(/civ init/i, function (res) {
 		res.send(':earth_africa: Ok, dette kan ta litt tid.');
 		
-
-		fs.createReadStream('c:/tmp/live.log')
+		fs.createReadStream(logFile)
     	.pipe(split())
     	.on('data', function (line) {
       		checkLine(line);
     	});
     	if(runde > 0){
         	var timer = Math.abs(new Date() - runde_startet) / 36e5;
-        	res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
-        	}
+        	res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og jeg tror (?) det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
+        }
+        else {
+        	res.send(':earth_americas: Puhh, ferdig.');
+        }
 	});
 
 	robot.respond(/status/i, function (res) {
 		if(runde > 0){
-        	var timer = Math.abs(new Date() - runde_startet) / 36e5;
-        	res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
+			if(runde_startet){
+	        	var timer = Math.abs(new Date() - runde_startet) / 36e5;
+	        	res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og jeg tror (?) det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
+        	}
+
         	}
         else
         	res.send(':question: Jeg har dessverre ikke oversikt over hvilken runde vi er på.');
@@ -116,18 +142,18 @@ module.exports = function (robot) {
         };
         if(ferdig.length > 0){
         	ferdig = ferdig.substring(0, ferdig.length - 2);
-        	res.send(':waving_white_flag: Spillere som er ferdig med turen sin: '+ferdig + '.');
+        	res.send(':checkered_flag: Spillere som er ferdig med turen sin: '+ferdig + '.');
         
         }
         if(uferdig.length > 0){
 			uferdig = uferdig.substring(0, uferdig.length - 2);
-	        res.send(':waving_black_flag: Vi venter på: '+uferdig + '.');
+	        res.send(':watch: Vi venter på: '+uferdig + '.');
 		}
 
     });
 
-    robot.respond(/test/i, function (res) {
-    	res.send(':coffee: |' + siste + '|');
+    robot.respond(/civ siste/i, function (res) {
+    	res.send(':coffee: ' + eventLogg[eventLogg.length-1] + '');
     });
 }
 
