@@ -59,7 +59,7 @@ var players = [
 ];
 function checkLine(line) {
 	var nuh = new Date();
-	var nuh = nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() + ': ';
+	var nuh = '_'+nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() + ':_ ';
 	if(line.indexOf('DBG: Game Turn') > -1){
 		runde = line.split(' ').pop();
 		runde_startet = new Date();
@@ -97,6 +97,17 @@ function checkLine(line) {
 		}
 		console.log(eventLogg[eventLogg.length-1]);
 	}
+	/*else if(line.indexOf(':m_iGameTurn') > -1){
+		// m_iGameTurn=59
+		console.log('---------------------');
+		console.log(line);
+		var runde = line.split('m_iGameTurn=').pop();
+		console.log(runde);
+		var tall = runde.split(' ')[0];
+		eventLogg.push( nuh + 'Runde '+ tall +' er lastet fra Save-fil!' );
+		runde_startet = new Date();
+		console.log('---------------------');
+	}*/
 }
 
 tail.on('line', function(line) {  
@@ -123,11 +134,10 @@ module.exports = function (robot) {
 
 	robot.respond(/status/i, function (res) {
 		if(runde > 0){
-			if(runde_startet){
-	        	var timer = Math.abs(new Date() - runde_startet) / 36e5;
-	        	res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og jeg tror (?) det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
-        	}
-
+			
+	        var timer = Math.abs(new Date() - runde_startet) / 36e5;
+	        res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og jeg tror (?) det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
+        	
         	}
         else
         	res.send(':question: Jeg har dessverre ikke oversikt over hvilken runde vi er på.');
@@ -152,8 +162,16 @@ module.exports = function (robot) {
 
     });
 
-    robot.respond(/civ siste/i, function (res) {
-    	res.send(':coffee: ' + eventLogg[eventLogg.length-1] + '');
+    robot.respond(/civ logg (\d+$)/i, function (res) {
+    	var antall = res.match[1];
+    	console.log(antall);
+    	var a = eventLogg.slice(-antall);
+    	var print = ':coffee: *Siste ' + antall + ' fra Loggen*\n';
+    	a.forEach(function(entry) {
+   			 console.log(entry);
+   			 print = print + ':small_blue_diamond: ' + entry +'\n';
+		});
+    	res.send(print);
     });
 }
 
