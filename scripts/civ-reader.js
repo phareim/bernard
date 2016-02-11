@@ -27,36 +27,37 @@ var players = [
 		slack: 'erling'
 	},
 	{
-				player: 2,
+		player: 2,
 		done: false,
 		steam: 'tormodh',
 		slack: 'tormodh'
 	},
 	{
-				player: 3,
+		player: 3,
 		done: false,
 		steam: 'phareim',
 		slack: 'petter'
 	},
 	{
-				player: 5,
+		player: 5,
 		done: false,
 		steam: 'toreae',
 		slack: 'alexander'
 	},
 	{
-				player: 6,
+		player: 6,
 		done: false,
 		steam: 'colin.oswald',
 		slack: 'colin_oswald'
 	},
 	{
-				player: 7,
+		player: 7,
 		done: false,
 		steam: 'Azathosk',
 		slack: 'eivind'
 	}	
 ];
+
 function checkLine(line) {
 	var nuh = new Date();
 	var nuh = '_'+nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() + ':_ ';
@@ -115,11 +116,13 @@ tail.on('line', function(line) {
 });
 var test = 1;
 module.exports = function (robot) {
+	
 	setInterval(function() { 
 		console.log("setTimeout: It's been five seconds!"); 
 		robot.messageRoom('#civtest', 'det har gått noen timer. best å sjekke hvor mange som har gjort turen sin.');
 		test = test + 1;
 	}, 86400000);
+
 	robot.respond(/civ init/i, function (res) {
 		res.send(':earth_africa: Ok, dette kan ta litt tid.');
 		
