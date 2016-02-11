@@ -10,6 +10,7 @@ var fs = require('fs');
 var runde = 0;
 var runde_startet = false;
 var siste = 'TEST';
+var init = false;
 
 var eventLogg = [];
 
@@ -58,6 +59,14 @@ var players = [
 	}	
 ];
 
+
+
+tail.on('line', function(line) {  
+	 checkLine(line); 
+});
+var test = 1;
+module.exports = function (robot) {
+	
 function checkLine(line) {
 	var nuh = new Date();
 	var nuh = '_'+nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() + ':_ ';
@@ -68,6 +77,9 @@ function checkLine(line) {
 			players[i].done = false;
 		}
 		eventLogg.push( nuh + 'Runde '+ runde +' er startet!' );
+		if(!init){
+			robot.messageRoom('#sivilisasjonstelegraf', 'Yo @channel! Runde '+ runde +' er startet!');
+		}
 		console.log(eventLogg[eventLogg.length-1]);
 	}
 	else if (line.indexOf(':NetTurnComplete : Turn Complete') > -1){
@@ -98,25 +110,8 @@ function checkLine(line) {
 		}
 		console.log(eventLogg[eventLogg.length-1]);
 	}
-	/*else if(line.indexOf(':m_iGameTurn') > -1){
-		// m_iGameTurn=59
-		console.log('---------------------');
-		console.log(line);
-		var runde = line.split('m_iGameTurn=').pop();
-		console.log(runde);
-		var tall = runde.split(' ')[0];
-		eventLogg.push( nuh + 'Runde '+ tall +' er lastet fra Save-fil!' );
-		runde_startet = new Date();
-		console.log('---------------------');
-	}*/
 }
 
-tail.on('line', function(line) {  
-	 checkLine(line); 
-});
-var test = 1;
-module.exports = function (robot) {
-	
 	setInterval(function() { 
 		console.log("setTimeout: It's been five seconds!"); 
 		robot.messageRoom('#civtest', 'det har gått noen timer. best å sjekke hvor mange som har gjort turen sin.');
@@ -124,20 +119,21 @@ module.exports = function (robot) {
 	}, 86400000);
 
 	robot.respond(/civ init/i, function (res) {
+		init = true;
 		res.send(':earth_africa: Ok, dette kan ta litt tid.');
 		
-		fs.createReadStream(logFile)
-    	.pipe(split())
+		var readStream = fs.createReadStream(logFile);
+    	readStream.pipe(split())
     	.on('data', function (line) {
       		checkLine(line);
     	});
-    	if(runde > 0){
-        	var timer = Math.abs(new Date() - runde_startet) / 36e5;
-        	res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og jeg tror (?) det er cirka ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
-        }
-        else {
-        	res.send(':earth_americas: Puhh, ferdig..');
-        }
+
+    	readStream.on('end', function (){
+    		console.log('DONE!!');
+    		res.send(':earth_americas: Puh.. ferdig. (sett gjerne gjenværende timer med `civ timer XX`)');
+    		init = false;
+    	});
+                
 	});
 
 	robot.respond(/status/i, function (res) {
