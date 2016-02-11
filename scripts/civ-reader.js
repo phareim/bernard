@@ -61,56 +61,58 @@ var players = [
 
 
 
-tail.on('line', function(line) {  
-	 checkLine(line); 
-});
 var test = 1;
 module.exports = function (robot) {
 	
-function checkLine(line) {
-	var nuh = new Date();
-	var nuh = '_'+nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() + ':_ ';
-	if(line.indexOf('DBG: Game Turn') > -1){
-		runde = line.split(' ').pop();
-		runde_startet = new Date();
-		for (var i = players.length - 1; i >= 0; i--) {
-			players[i].done = false;
+	tail.on('line', function(line) {  
+		 checkLine(line); 
+	});
+
+
+	function checkLine(line) {
+		var nuh = new Date();
+		var nuh = '_'+nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() + ':_ ';
+		if(line.indexOf('DBG: Game Turn') > -1){
+			runde = line.split(' ').pop();
+			runde_startet = new Date();
+			for (var i = players.length - 1; i >= 0; i--) {
+				players[i].done = false;
+			}
+			eventLogg.push( nuh + 'Runde '+ runde +' er startet!' );
+			if(!init){
+				robot.messageRoom('#sivilisasjonstelegraf', 'Yo @channel! Runde '+ runde +' er startet!');
+			}
+			console.log(eventLogg[eventLogg.length-1]);
 		}
-		eventLogg.push( nuh + 'Runde '+ runde +' er startet!' );
-		if(!init){
-			robot.messageRoom('#sivilisasjonstelegraf', 'Yo @channel! Runde '+ runde +' er startet!');
+		else if (line.indexOf(':NetTurnComplete : Turn Complete') > -1){
+			// [449145.161] Net RECV (5) :NetTurnComplete : Turn Complete, 5, 6/9
+			var arr = line.split(' ');
+			arr.pop();
+			var spiller = arr.pop();
+			spiller = spiller.substring(0, spiller.length - 1);
+			
+	        for (var i = players.length - 1; i >= 0; i--) {
+	        	if (players[i].player == spiller) {
+	        		players[i].done = true;
+	        		eventLogg.push( nuh + players[i].slack  +' har avsluttet turen sin.');
+	        	}
+			}		
+			console.log(eventLogg[eventLogg.length-1]);
 		}
-		console.log(eventLogg[eventLogg.length-1]);
-	}
-	else if (line.indexOf(':NetTurnComplete : Turn Complete') > -1){
-		// [449145.161] Net RECV (5) :NetTurnComplete : Turn Complete, 5, 6/9
-		var arr = line.split(' ');
-		arr.pop();
-		var spiller = arr.pop();
-		spiller = spiller.substring(0, spiller.length - 1);
-		
-        for (var i = players.length - 1; i >= 0; i--) {
-        	if (players[i].player == spiller) {
-        		players[i].done = true;
-        		eventLogg.push( nuh + players[i].slack  +' har avsluttet turen sin.');
-        	}
-		}		
-		console.log(eventLogg[eventLogg.length-1]);
-	}
-	else if (line.indexOf(':NetPlayerReady') > -1) {
-		
-		// [574290.318] Net RECV (1) :NetPlayerReady(Player=3, count=2 / 2)
-		var str = line.split('Player=').pop();
-		str = str.substring(0, str.indexOf(","));
-		for (var i = players.length - 1; i >= 0; i--) {
-        	if (players[i].player == str) {
-        		eventLogg.push(nuh + players[i].slack +' logget på.');
-        		players[i].done = false;
-        	}
+		else if (line.indexOf(':NetPlayerReady') > -1) {
+			
+			// [574290.318] Net RECV (1) :NetPlayerReady(Player=3, count=2 / 2)
+			var str = line.split('Player=').pop();
+			str = str.substring(0, str.indexOf(","));
+			for (var i = players.length - 1; i >= 0; i--) {
+	        	if (players[i].player == str) {
+	        		eventLogg.push(nuh + players[i].slack +' logget på.');
+	        		players[i].done = false;
+	        	}
+			}
+			console.log(eventLogg[eventLogg.length-1]);
 		}
-		console.log(eventLogg[eventLogg.length-1]);
 	}
-}
 
 	setInterval(function() { 
 		console.log("setTimeout: It's been five seconds!"); 
