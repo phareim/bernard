@@ -8,9 +8,10 @@
 //   None
 //
 // Commands:
-//   civ init - initializes the in-memory data structure from the log file.
+//  civ init - initializes the in-memory data structure from the log file.
 //	civ timer XX - sets the number of hours left in the round. 
-//	status - gives the status of the current round
+//  civ set runde XX - sets the current round.
+//	status - gives the status of the current round.
 //
 
 'use strict';
@@ -215,6 +216,11 @@ module.exports = function (robot) {
     	var nyttStartpunkt = new Date(new Date().getTime() - (timerSidenStart * 60 * 60 * 1000));
     	runde_startet = nyttStartpunkt;
     	eventLogg.push('Start-tidspunkt satt manuelt. Det er ca. ' + timerIgjen +' timer igjen til runden er ferdig.');
+    });
+	
+	robot.respond(/civ set runde (\d+$)/i, function (res) {
+    	runde = res.match[1];
+    	res.send('runde satt til: ' + runde);    	
     });
 }
 
