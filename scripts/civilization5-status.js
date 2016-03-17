@@ -155,41 +155,47 @@ module.exports = function (robot) {
 	});
 
 
+	function status(res){
+            if(runde > 0){
+
+                var timer = Math.abs(new Date() - runde_startet) / 36e5;
+                res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og så vidt jeg vet er det ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
+
+            }
+            else
+                res.send(':question: Jeg har dessverre ikke oversikt over hvilken runde vi er på.');
+            var ferdig = '';
+            var uferdig = '';
+            var count = 0;
+            for (var i = players.length - 1; i >= 0; i--) {
+                if (players[i].done){
+                    count++;
+                    ferdig = ferdig + '@' + players[i].slack+', ';
+                }
+                else
+                    uferdig = uferdig + '@' + players[i].slack+', ';
+            };
+
+            if(count === 0)
+                res.send(':checkered_flag: ingen spillere er ferdig med turen sin.');
+            else if(count === 1)
+                res.send(':checkered_flag: én spiller er ferdig med turen sin.');
+            else
+                res.send(':checkered_flag: '+ count +' spillere er ferdig med turen sin.');
+
+            if(uferdig.length > 0){
+                uferdig = uferdig.substring(0, uferdig.length - 2);
+                res.send(':watch: Vi venter på: '+uferdig + '.');
+            }
+        }
+
 	robot.respond(/status/i, function (res) {
-		if(runde > 0){
-			
-	        var timer = Math.abs(new Date() - runde_startet) / 36e5;
-	        res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og så vidt jeg vet er det ' + (48-timer).toPrecision(2) + ' timer igjen av runden.');
-        	
-        	}
-        else
-        	res.send(':question: Jeg har dessverre ikke oversikt over hvilken runde vi er på.');
-        var ferdig = '';
-        var uferdig = '';
-        var count = 0;
-        for (var i = players.length - 1; i >= 0; i--) {
-        	if (players[i].done){
-        		count++;
-        		ferdig = ferdig + '@' + players[i].slack+', ';
-        	}
-        	else
-        		uferdig = uferdig + '@' + players[i].slack+', ';
-        };
-        
-    	if(count === 0)
-    		res.send(':checkered_flag: ingen spillere er ferdig med turen sin.');
-    	else if(count === 1)
-    		res.send(':checkered_flag: én spiller er ferdig med turen sin.');
-    	else
-    		res.send(':checkered_flag: '+ count +' spillere er ferdig med turen sin.');
-        
-        if(uferdig.length > 0){
-			uferdig = uferdig.substring(0, uferdig.length - 2);
-	        res.send(':watch: Vi venter på: '+uferdig + '.');
-		}
-
-
+		status(res);
     });
+
+	robot.respond(/civ status/i, function (res) {
+		status(res);
+	});
 
     robot.respond(/civ logg (\d+$)/i, function (res) {
     	var antall = res.match[1];
@@ -203,10 +209,9 @@ module.exports = function (robot) {
     	res.send(print);
     });
 
-    robot.respond(/civ test/i, function (res) {
-    	console.log('test 1');
-    	robot.messageRoom('#testtest', 'Arrr... here I am, infederls...');
-    	console.log('test 2');
+    robot.respond(/message (\S+) (.*)/i, function (res) {
+    	robot.messageRoom(res.match[1], res.match[2]);
+    	console.log('message sent to room ' + res.match[1] + ': ' + res.match[2]);
 
     });
 
