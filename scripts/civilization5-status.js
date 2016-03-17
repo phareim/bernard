@@ -130,13 +130,7 @@ module.exports = function (robot) {
         }
     }
 
-    setInterval(function () {
-        console.log("setTimeout: It's been five seconds!");
-        robot.messageRoom('#civtest', 'det har gått noen timer. best å sjekke hvor mange som har gjort turen sin.');
-        test = test + 1;
-    }, 86400000);
-
-    robot.respond(/civ init/i, function (res) {
+    function init(res) {
         init = true;
         res.send(':earth_africa: Ok, dette kan ta litt tid.');
 
@@ -151,6 +145,10 @@ module.exports = function (robot) {
             res.send(':earth_americas: Puh.. ferdig. (sett gjerne gjenværende timer med `civ timer XX`)');
             init = false;
         });
+    }
+
+    robot.respond(/civ init/i, function (res) {
+        init(res);
 
     });
 
@@ -225,11 +223,14 @@ module.exports = function (robot) {
         var nyttStartpunkt = new Date(new Date().getTime() - (timerSidenStart * 60 * 60 * 1000));
         runde_startet = nyttStartpunkt;
         eventLogg.push('Start-tidspunkt satt manuelt. Det er ca. ' + timerIgjen + ' timer igjen til runden er ferdig.');
+        res.send('Start-tidspunkt satt manuelt. Det er ca. ' + timerIgjen + ' timer igjen til runden er ferdig.');
+
     });
 
     robot.respond(/civ set runde (\d+$)/i, function (res) {
         runde = res.match[1];
+        eventLogg.push('runde satt til: ' + runde);
         res.send('runde satt til: ' + runde);
     });
-}
+};
 
