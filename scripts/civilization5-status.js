@@ -101,7 +101,6 @@ module.exports = function (robot) {
             console.log(eventLogg[eventLogg.length - 1]);
         }
         else if (line.indexOf(':NetTurnComplete : Turn Complete') > -1) {
-            // [449145.161] Net RECV (5) :NetTurnComplete : Turn Complete, 5, 6/9
             var arr = line.split(' ');
             arr.pop();
             var spiller = arr.pop();
@@ -116,8 +115,6 @@ module.exports = function (robot) {
             console.log(eventLogg[eventLogg.length - 1]);
         }
         else if (line.indexOf(':NetPlayerReady') > -1) {
-
-            // [574290.318] Net RECV (1) :NetPlayerReady(Player=3, count=2 / 2)
             var str = line.split('Player=').pop();
             str = str.substring(0, str.indexOf(","));
             for (var i = players.length - 1; i >= 0; i--) {
@@ -149,6 +146,11 @@ module.exports = function (robot) {
 
     robot.respond(/civ init/i, function (res) {
         init(res);
+    });
+
+    robot.respond(/civ pause/i, function (res) {
+        runde = -1;
+        res.send(':sunglasses:');
 
     });
 
@@ -156,8 +158,10 @@ module.exports = function (robot) {
     function status(res) {
         if (runde < 0) {
             res.send(':earth_asia: Spilltelegrafen har tatt seg en pause folkens. Gå ut og slapp av i sola.');
+            eventLogg.push(':sunglasses: Vi har tatt en pause.');
+            return;
         }
-        if (runde > 0) {
+        else if (runde > 0) {
 
             var timer = Math.abs(new Date() - runde_startet) / 36e5;
             res.send(':earth_africa: Vi spiller nå runde ' + runde + ', og så vidt jeg vet er det ' + (48 - timer).toPrecision(2) + ' timer igjen av runden.');
