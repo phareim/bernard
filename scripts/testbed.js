@@ -10,9 +10,7 @@
 // Commands:
 //
 
-
 module.exports = function (robot) {
-
 	robot.respond(/hvordan er været?/i, function (res) {
         res.send('Aner ikke');
 	});

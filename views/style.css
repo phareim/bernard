@@ -1,0 +1,14 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+body{
+  min-width: 400px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+
+  font-family: 'Open Sans', sans-serif;
+}
+
+.done{
+  color: green;
+}

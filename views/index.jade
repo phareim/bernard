@@ -1,0 +1,16 @@
+html
+  head
+    style
+      include style.css
+    title= title
+  body
+    h1= title
+    h2= round
+    p= timeleft
+    p
+      ul
+        each player in players
+          if (player.done)
+            li(class='done')= 'Spiller '+ player.slack  + ' er ferdig med turen sin.'
+          else
+            li= 'Vi venter fortsatt på ' + player.slack + '.'
