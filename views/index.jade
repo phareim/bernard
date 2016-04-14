@@ -11,6 +11,6 @@ html
       ul
         each player in players
           if (player.done)
-            li(class='done')= 'Spiller '+ player.slack  + ' er ferdig med turen sin.'
+            li(class='done')= ''+ player.slack  + ' er ferdig med turen sin.'
           else
             li= 'Vi venter fortsatt på ' + player.slack + '.'
