@@ -50,11 +50,6 @@ app.listen(3000, function() {
 });
 
 var players = [{
-  player: 0,
-  done: false,
-  steam: 'Filleriste',
-  slack: 'henning'
-}, {
   player: 1,
   done: false,
   steam: 'Vulpus',
@@ -79,11 +74,6 @@ var players = [{
   done: false,
   steam: 'colin.oswald',
   slack: 'colin_oswald'
-}, {
-  player: 7,
-  done: false,
-  steam: 'Azathosk',
-  slack: 'eivind'
 }];
 
 
