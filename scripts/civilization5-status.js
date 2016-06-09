@@ -15,8 +15,9 @@
 //
 
 'use strict';
-
-var logFile = process.env.CIV5_LOG;
+var webport = process.env.civ5_webport || 3000;
+var logFile = process.env.CIV5_LOG ||
+  '%userprofile%\\Documents\\My Games\\Sid Meier\'s Civilization 5\\Logs\\net_message_debug.log';
 
 var Tail = require('file-tail');
 var tail = Tail.startTailing(logFile);
@@ -25,6 +26,7 @@ var fs = require('fs');
 
 var dager_til_start = 0;
 var runde = 0;
+var timestamp = 0;
 var runde_startet = false;
 var siste = 'TEST';
 var init = false;
@@ -41,12 +43,16 @@ app.get('/', function(req, res) {
   res.render('index', {
     title: 'Sivilisasjonstelegrafen',
     round: 'Runde ' + runde,
+    timeleft: 'I følge mine notater er det ' + (48 - (Math.abs(new Date() -
+        runde_startet) / 36e5)).toPrecision(2) +
+      ' timer igjen av runden.',
     players: players
   });
 });
 
-app.listen(3000, function() {
-  console.log('Example app listening on port 3000!');
+app.listen(webport, function() {
+  console.log('Civilization 5 Status Web-page now running on port ' +
+    webport + '.');
 });
 
 var players = [{
@@ -86,12 +92,29 @@ module.exports = function(robot) {
 
 
   function checkLine(line) {
+    if (runde === 0 && line.indexOf('Game Turn') > -1) {
+      runde = /Game Turn ([0-9]*)/g.exec(line)[0].split(' ').pop().trim();
+      console.log('Runde satt til: ' + runde);
+    }
+    if (timestamp === 0)
+      timestamp = /[0-9].*(?=(\.))/g.exec(line)[0];
     var nuh = new Date();
     var nuh = '_' + nuh.toLocaleDateString() + ' ' + nuh.toLocaleTimeString() +
       ':_ ';
     if (line.indexOf('DBG: Game Turn') > -1) {
-      runde = line.split(' ').pop();
-      runde_startet = new Date();
+      var current_timestamp = /[0-9].*(?=(\.))/g.exec(line)[0];
+      runde = line.split(' ').pop().trim();
+
+      if (init) {
+        /**
+        runde_startet siden start er Date()  minus (current_timestamp-timestamp).
+        */
+        runde_startet = new Date(new Date() - (current_timestamp - timestamp) *
+          1000);
+      } else {
+        runde_startet = new Date();
+      }
+      timestamp = current_timestamp;
       for (var i = players.length - 1; i >= 0; i--) {
         players[i].done = false;
       }
@@ -114,12 +137,12 @@ module.exports = function(robot) {
         }
       }
       console.log(eventLogg[eventLogg.length - 1]);
-    } else if (line.indexOf(':NetPlayerReady') > -1) {
+    } else if (line.indexOf(' NetPlayerReady') > -1) {
       var str = line.split('Player=').pop();
       str = str.substring(0, str.indexOf(","));
       for (var i = players.length - 1; i >= 0; i--) {
         if (players[i].player == str) {
-          eventLogg.push(nuh + players[i].slack + ' logget på.');
+          //eventLogg.push(nuh + players[i].slack + ' logget på.');
           players[i].done = false;
         }
       }
@@ -140,7 +163,7 @@ module.exports = function(robot) {
     readStream.on('end', function() {
       console.log('DONE!!');
       res.send(
-        ':earth_americas: Puh.. ferdig. (sett gjerne gjenværende timer med `civ timer XX`)'
+        ':earth_americas: Puh.. ferdig.'
       );
       init = false;
     });
@@ -210,7 +233,7 @@ module.exports = function(robot) {
 
   robot.respond(/civ logg (\d+$)/i, function(res) {
     var antall = res.match[1];
-    console.log(antall);
+    console.log('Leser ' + antall + ' fra loggen.');
     var a = eventLogg.slice(-antall);
     var print = ':coffee: *Siste ' + antall + ' fra Loggen*\n';
     a.forEach(function(entry) {
@@ -245,4 +268,12 @@ module.exports = function(robot) {
     eventLogg.push('runde satt til: ' + runde);
     res.send('runde satt til: ' + runde);
   });
+
+  if (runde === 0) {
+    init({
+      send: function(msg) {
+        console.log(msg);
+      }
+    });
+  }
 };
